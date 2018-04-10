@@ -195,5 +195,5 @@ if __name__ == '__main__':
 
     # change 8 to your number of cores
     with Pool(8) as p:
-        p.map(para_generate, np.arange(1999,number_of_samples))
+        p.map(para_generate, np.arange(number_of_samples))
                           
