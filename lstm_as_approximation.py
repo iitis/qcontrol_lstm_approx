@@ -241,39 +241,33 @@ if __name__ == "__main__":
         # main functionality
         for gamma in list_gammas:
             for alpha in list_alphas:
-                table = []
-                for i in np.arange(10):
-                    print('alpha= ', alpha)
-                    print('gamma= ', gamma)
-                    print('noise_name= ', noise_name)
+                print('alpha= ', alpha)
+                print('gamma= ', gamma)
+                print('noise_name= ', noise_name)
 
-                    pred, acc = train_and_predict(n_ts,
-                                              gamma,
-                                              alpha,
-                                              evo_time,
-                                              batch_size,
-                                              supeop_size,
-                                              controls_nb,
-                                              nb_epochs,
-                                              learning_rate,
-                                              train_set_size,
-                                              test_set_size,
-                                              size_of_lrs,
-                                              dim,
-                                              noise_name,
-                                              model_dim)
-                    table.append(acc)
-                    np.savez("results/eff_fid_lstm/dim_{}/NkNd_{}_gam_{}_alpha_{}_statistic".format(model_dim,
-                                                                                        noise_name,
-                                                                                        gamma,
-                                                                                        alpha),table)
+                pred, acc = train_and_predict(n_ts,
+                                          gamma,
+                                          alpha,
+                                          evo_time,
+                                          batch_size,
+                                          supeop_size,
+                                          controls_nb,
+                                          nb_epochs,
+                                          learning_rate,
+                                          train_set_size,
+                                          test_set_size,
+                                          size_of_lrs,
+                                          dim,
+                                          noise_name,
+                                          model_dim)
 
 
-                # # save the results
-                # np.savez("results/eff_fid_lstm/dim_{}/{}_gam_{}_alpha_{}".format(model_dim,
-                #                                                                  noise_name,
-                #                                                                  gamma,
-                #                                                                  alpha), pred)
+
+                # save the results
+                np.savez("results/eff_fid_lstm/dim_{}/{}_gam_{}_alpha_{}".format(model_dim,
+                                                                                 noise_name,
+                                                                                 gamma,
+                                                                                 alpha), pred)
     else:
 
          eps = 10**(-eps_order)

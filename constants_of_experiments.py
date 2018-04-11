@@ -51,8 +51,8 @@ gamma = 0.8
 alpha = 0.
 
 # there is possibility to examine performance of network for many parameters
-list_gammas = [0.8]
-list_alphas = [0.]
+list_gammas = [0.2,0.4,0.6,0.8]
+list_alphas = [0.,0.2,0.4,0.6,0.8]
 
 # constants for the approximation experiment
 accept_err = 0.1

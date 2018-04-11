@@ -13,8 +13,6 @@ def get_data(train_set_size,
     if len(list(set(train_indices).intersection(set(test_indices)))) != 0:
         print("Test set overlaps with the training set!")
 
-    print("To jest NOWY kod, ale NOWE dane")
-
     for i in train_indices:
         input = np.asarray(np.load("training/dim_{}/NCP_data/idx_{}.npz".format(
             model_dim, i))['arr_0'])
