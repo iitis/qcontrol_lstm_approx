@@ -42,7 +42,6 @@ def my_lstm(x_,controls_nb, size_of_lrs, keep_prob):
         parallel_iterations=32
     )
 
-
     output_fw, output_bw= tf.split(outputs[0], 2, axis=2)
     sum_fw_bw = tf.add(output_fw, output_bw)
     squeezed_layer = tf.reshape(sum_fw_bw, [-1, size_of_lrs[-1]])
@@ -119,7 +118,7 @@ def fit(sess,
                 #     f.write(chrome_trace)
         test_accuracy = accuracy.eval(feed_dict={x_: test_input,
                                                  y_: test_target,
-                                                 keep_prob: 1.0})
+                                                 keep_prob: 1.})
 
     return test_accuracy
 
