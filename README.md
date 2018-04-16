@@ -23,5 +23,10 @@
 
 # Requirements
 
-The code is based on TensorFlow library. It also utilizes QuTip for generating
+The code has been tested with Python 3.6 distributed with Anaconda. The packages
+utilizes QuTIP is based on TensorFlow library. It also utilizes QuTip for generating
 control pulses.
+
+# Citing
+
+M. Ostaszewski, J.A. Miszczak, P. Sadowski, L. Banchi,  Approximation of quantum control correction scheme using deep neural networks, https://arxiv.org/abs/1803.05193
