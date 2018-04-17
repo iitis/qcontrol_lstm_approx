@@ -123,7 +123,7 @@ def generate_training_sample(unit_nb, ctrl_init, initial, params, n_ts,evo_time,
     f_ext = None
     path_template = "training/dim_{}/mtx/idx_{}"
     fid_err_targ = 1e-12
-    max_iter = 20000
+    max_iter = 200000
 
     max_wall_time = 5 * 60
     min_grad = 1e-20

@@ -57,7 +57,6 @@ def id_aSxbSy_spinChain_2x1(params):
 
 def aSxbSy_id_spinChain_dim_2x1(params):
     alpha, gamma = params
-
     Hc_x = np.kron(np.eye(4), Lc_x.conjugate()) - np.kron(Lc_x, np.eye(4))
     Hc_z = np.kron(np.eye(4), Lc_z.conjugate()) - np.kron(Lc_z, np.eye(4))
     ctrls = [-1j * Hc_x, -1j * Hc_z]

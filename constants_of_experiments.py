@@ -33,7 +33,7 @@ ctrl_init = 'ZERO'
 
 # parameters depending on the available number of samples
 # number of control pulses for training
-train_set_size = 1000
+train_set_size = 4000
 # number of control pulses for testing
 test_set_size = 1000
 
@@ -51,7 +51,7 @@ gamma = 0.8
 alpha = 0.
 
 # there is possibility to examine performance of network for many parameters
-list_gammas = [0.2,0.4,0.6,0.8]
+list_gammas = [0.8]
 list_alphas = [0.,0.2,0.4,0.6,0.8]
 
 # constants for the approximation experiment

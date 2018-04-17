@@ -186,8 +186,8 @@ def train_and_predict(n_ts,
     (train_input, train_target, test_input, test_target) = get_data(train_set_size,
                                                                     test_set_size,
                                                                     model_dim)
-    # data_range = train_set_size + test_set_size
-    # (train_input, train_target, test_input, test_target) = old_data(train_set_size, test_set_size, data_range, model_dim)
+
+
 
 
     # maintaining the memory
