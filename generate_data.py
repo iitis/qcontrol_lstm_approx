@@ -111,6 +111,7 @@ def rand_unitary(n):
     '''A Random unitary matrix distributed with Haar measure
     Mezzadri, Francesco. 2006. How to generate random matrices from the
     classical compact groups, math-ph/0609050.'''
+    np.random.seed()
     z = (np.random.randn(n,n) + 1j*np.random.randn(n,n))/np.sqrt(2.0)
     q,r = scipy.linalg.qr(z)
     d = np.diagonal(r)
