@@ -10,7 +10,6 @@ from tensorflow.python.client import timeline
 
 from get_data import *
 import pathlib
-from google.protobuf import descriptor_pb2
 
 from noise_models_and_integration import *
 from architecture import *
@@ -245,6 +244,7 @@ if __name__ == "__main__":
                 print('alpha= ', alpha)
                 print('gamma= ', gamma)
                 print('noise_name= ', noise_name)
+                print('layers 300, 350, 400,450')
 
                 pred, acc = train_and_predict(n_ts,
                                           gamma,

@@ -72,27 +72,6 @@ def aSxbSy_id_spinChain_dim_2x1(params):
 
     return (ctrls, drift)
 
-def Sy_id_spChain_dim_2x1(gamma):
-    Lc_x = np.kron(Sx, np.eye(2))
-    # sigma Y control
-    Lc_y = np.kron(Sy, np.eye(2))
-    # sigma Z control
-    Lc_z = np.kron(Sz, np.eye(2))
-
-    Hc_x = np.kron(np.eye(4), Lc_x.conjugate()) - np.kron(Lc_x, np.eye(4))
-    Hc_z = np.kron(np.eye(4), Lc_z.conjugate()) - np.kron(Lc_z, np.eye(4))
-
-    ctrls = [-1j * Hc_x, -1j * Hc_z]
-
-    spChain = np.kron(Sx, Sx) + np.kron(Sy, Sy) + np.kron(Sz, Sz)
-    Ham_part = np.kron(np.eye(4), spChain.conjugate()) - np.kron(spChain, np.eye(4))
-    Ham_part *= -1j
-
-    H0 = np.kron(np.eye(4), Lc_y.conjugate()) - np.kron(Lc_y, np.eye(4))
-    drift = gamma * (-1j * H0) + Ham_part
-    return (ctrls, drift)
-
-
 ########################################################################################################################
 ########################################################################################################################
 # Functions related to mathematical operations required during the learning
@@ -113,9 +92,6 @@ def integrate_lind(h, params, n_ts, evo_time, noise_name, tf_result):
     elif noise_name == "aSxbSy_id_spinChain_dim_2x1":
         n = 16
         ctrls, drift = aSxbSy_id_spinChain_dim_2x1(params)
-    elif noise_name == 'Sy_id_spChain':
-        n = 16
-        ctrls, drift = Sy_id_spChain_dim_2x1(gamma)
 
     A = np.eye(n,dtype=complex)
 
