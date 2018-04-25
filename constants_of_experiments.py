@@ -38,9 +38,9 @@ train_set_size = 4000
 test_set_size = 1000
 
 # parameters of tensorflow
-nb_epochs = 100000
+nb_epochs = 50000
 learning_rate = 0.0001
-size_of_lrs = [300, 350, 400,450]
+size_of_lrs = [200, 250, 350]
 batch_size = 5 
 
 # part of architecture determined by the shape of data
@@ -52,7 +52,7 @@ alpha = 0.
 
 # there is possibility to examine performance of network for many parameters
 list_gammas = [0.8,0.5,0.2]
-list_alphas = [0.2,0.5,0.8]
+list_alphas = [0.,0.2,0.5,0.8]
 
 # constants for the approximation experiment
 accept_err = 0.1

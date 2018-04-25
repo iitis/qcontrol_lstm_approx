@@ -241,34 +241,31 @@ if __name__ == "__main__":
         # main functionality
         for gamma in list_gammas:
             for alpha in list_alphas:
-                print('alpha= ', alpha)
-                print('gamma= ', gamma)
-                print('noise_name= ', noise_name)
-                print('layers 300, 350, 400,450')
-
-                pred, acc = train_and_predict(n_ts,
-                                          gamma,
-                                          alpha,
-                                          evo_time,
-                                          batch_size,
-                                          supeop_size,
-                                          controls_nb,
-                                          nb_epochs,
-                                          learning_rate,
-                                          train_set_size,
-                                          test_set_size,
-                                          size_of_lrs,
-                                          dim,
-                                          noise_name,
-                                          model_dim)
+                statistic = dict()
+                for i in range(10):
+                    pred, acc = train_and_predict(n_ts,
+                                              gamma,
+                                              alpha,
+                                              evo_time,
+                                              batch_size,
+                                              supeop_size,
+                                              controls_nb,
+                                              nb_epochs,
+                                              learning_rate,
+                                              train_set_size,
+                                              test_set_size,
+                                              size_of_lrs,
+                                              dim,
+                                              noise_name,
+                                              model_dim)
 
 
-
-                # save the results
-                np.savez("results/eff_fid_lstm/dim_{}/{}_gam_{}_alpha_{}".format(model_dim,
-                                                                                 noise_name,
-                                                                                 gamma,
-                                                                                 alpha), pred)
+                    statistic[i] = acc
+                    # save the results
+                    np.savez("results/eff_fid_lstm/dim_{}/statistic_{}_gam_{}_alpha_{}".format(model_dim,
+                                                                                                 noise_name,
+                                                                                                 gamma,
+                                                                                                 alpha), statistic)
     else:
 
          eps = 10**(-eps_order)
