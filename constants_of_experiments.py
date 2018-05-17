@@ -8,7 +8,7 @@ import numpy as np
 # For its value set to False, it performs experiment with local disturbances. In
 # this case it is necessary to have a trained network. One needs to perform at
 # least one experiment with value True before doing this.
-testing_effectiveness = True
+testing_effectiveness = False
 
 # size of the superoperator is dim^2
 supeop_size = 16
@@ -47,11 +47,11 @@ batch_size = 5
 controls_nb = 2
 
 # parameters controlling the noise
-gamma = 0.8
-alpha = 0.
+gamma = 0.2
+alpha = 0.0
 
 # there is possibility to examine performance of network for many parameters
-list_gammas = [0.8,0.5,0.2]
+list_gammas = [0.2,0.4,0.6,0.8]
 list_alphas = [0.,0.2,0.5,0.8]
 
 # constants for the approximation experiment
