@@ -70,6 +70,8 @@ def generate_training_sample(unit_nb, ctrl_init, initial, params, n_ts,evo_time,
         ctrls, drift = id_aSxbSy_spinChain_2x1(params)
     elif noise_name == "aSxbSy_id_spinChain_dim_2x1":
         ctrls, drift = aSxbSy_id_spinChain_dim_2x1(params)
+    elif noise_name == "spinChainDrift_spinChain_dim_2x1":
+        ctrls, drift = spinChainDrift_spinChain_dim_2x1(params)
 
     ctrls = [Qobj(ctrls[i]) for i in range(len(ctrls))]
 

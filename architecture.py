@@ -1,5 +1,6 @@
 import tensorflow as tf
 from functools import partial
+from sys import stdout
 from sklearn.model_selection import KFold
 
 from tensorflow.python.client import timeline
@@ -65,15 +66,14 @@ def fit(sess,
       batch_size,
       train_set_size,
       learning_rate,
-      gamma,
-      alpha,
+      model_params,
       n_ts,
       evo_time,
       dim,
       noise_name):
 
-    params = (alpha,gamma)
-    optimizer, accuracy = fidelity_cost_fn(network, y_, learning_rate, params, n_ts, evo_time,dim, noise_name)
+
+    optimizer, accuracy = fidelity_cost_fn(network, y_, learning_rate, model_params, n_ts, evo_time,dim, noise_name)
 
 
     # 500 is the number of test samples used in monitoring the efficiency of the network
@@ -104,8 +104,11 @@ def fit(sess,
                                                              keep_prob: 1.0})
 
                     print("step %d, training accuracy %g" % (j, train_accuracy))
+                    stdout.flush()
                     print("step %d, test accuracies %g" % (j, test_accuracy))
+                    stdout.flush()
                     print (" ")
+                    stdout.flush()
                 sess.run(optimizer,
                          feed_dict={x_: batch[0],
                                     y_: batch[1],

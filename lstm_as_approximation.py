@@ -1,5 +1,5 @@
 import os
-from sys import argv
+from sys import argv, stdout
 os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 import tensorflow as tf
 import numpy as np
@@ -16,10 +16,7 @@ from noise_models_and_integration import *
 from architecture import *
 from constants_of_experiments import *
 
-file = open("testfile.txt","w")
 
-file.write("Hello World\n")
-file.flush()
 def variation_acc2_local_disturb(sess,
                                  network,
                                  x_,
@@ -155,8 +152,7 @@ def experiment_loc_disturb(n_ts,
 
 
 def train_and_predict(n_ts,
-                      gamma,
-                      alpha,
+                      model_params,
                       evo_time,
                       batch_size,
                       supeop_size,
@@ -213,16 +209,21 @@ def train_and_predict(n_ts,
                   batch_size,
                   train_set_size,
                   learning_rate,
-                  gamma,
-                  alpha,
+                  model_params,
                   n_ts,
                   evo_time,
                   dim,
                   noise_name)
+
         # making prediction by trained model
         pred = get_prediction(sess, network, x_, keep_prob, test_input)
         # saving trained model
-        saver.save(sess, "weights/dim_{}/{}/gam_{}_alfa_{}.ckpt".format(model_dim, noise_name, gamma, alpha))
+        if noise_name == "spinChainDrift_spinChain_dim_2x1":
+            gamma, alpha, beta = model_params
+            saver.save(sess, "weights/dim_{}/{}/gam_{}_alfa_{}_beta_{}.ckpt".format(model_dim, noise_name, gamma, alpha,beta))
+        else:
+            gamma, alpha= model_params
+            saver.save(sess, "weights/dim_{}/{}/gam_{}_alfa_{}.ckpt".format(model_dim, noise_name, gamma, alpha))
 
         sess.close()
     tf.reset_default_graph()
@@ -239,10 +240,6 @@ if __name__ == "__main__":
     # Note: change the below value if you have already trained the network
     # train_model = True
 
-    gamma = params_list[int(argv[1])][0]
-    alpha = params_list[int(argv[1])][1]
-    file.write("alpha="+str(alpha)+"\n")
-    file.flush()
 
     if testing_effectiveness:
         pathlib.Path("results/eff_fid_lstm/dim_{}".format(model_dim)).mkdir(parents=True, exist_ok=True)
@@ -250,11 +247,8 @@ if __name__ == "__main__":
 
         statistic = dict()
         for i in range(10):
-            file.write(str(i)+"\n")
-            file.flush()
             pred, acc = train_and_predict(n_ts,
-                                      gamma,
-                                      alpha,
+                                      model_params,
                                       evo_time,
                                       batch_size,
                                       supeop_size,
@@ -271,10 +265,19 @@ if __name__ == "__main__":
 
             statistic[i] = acc
             # save the results
-            np.savez("results/eff_fid_lstm/dim_{}/statistic_{}_gam_{}_alpha_{}".format(model_dim,
-                                                                                         noise_name,
-                                                                                         gamma,
-                                                                                         alpha), statistic)
+            if noise_name == "spinChainDrift_spinChain_dim_2x1":
+                # gamma, alpha, beta = model_params
+                np.savez("results/eff_fid_lstm/dim_{}/statistic_{}_gam_{}_alpha_{}".format(model_dim,
+                                                                                           noise_name,
+                                                                                           gamma,
+                                                                                           alpha, beta), statistic)
+            else:
+                # gamma, alpha = model_params
+                np.savez("results/eff_fid_lstm/dim_{}/statistic_{}_gam_{}_alpha_{}".format(model_dim,
+                                                                                           noise_name,
+                                                                                           gamma,
+                                                                                           alpha), statistic)
+
     else:
 
          eps = 10**(-eps_order)
@@ -301,4 +304,4 @@ if __name__ == "__main__":
                                                                                         gamma,
                                                                                         alpha,
                                                                                         eps_order), data)
-file.close()
+

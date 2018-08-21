@@ -73,7 +73,7 @@ def aSxbSy_id_spinChain_dim_2x1(params):
     return (ctrls, drift)
 
 def spinChainDrift_spinChain_dim_2x1(params):
-    alpha, gamma = params
+    gamma, alpha, beta = params
     Hc_x = np.kron(np.eye(4), Lc_x.conjugate()) - np.kron(Lc_x, np.eye(4))
     Hc_z = np.kron(np.eye(4), Lc_z.conjugate()) - np.kron(Lc_z, np.eye(4))
     ctrls = [-1j * Hc_x, -1j * Hc_z]
@@ -82,9 +82,9 @@ def spinChainDrift_spinChain_dim_2x1(params):
     Ham_part = np.kron(np.eye(4), spChain.conjugate()) - np.kron(spChain, np.eye(4))
     Ham_part *= -1j
 
-    aSxbSy = alpha*np.kron(Sx, Sx) + beta*np.kron(Sy, Sy) + (1-alpha-beta)*np.kron(Sz, Sz)
-    Lc_rnd = np.kron(aSxbSy, np.eye(2))
-    H0 = np.kron(np.eye(4), Lc_rnd.conjugate()) - np.kron(Lc_rnd, np.eye(4))
+    spinChainDrift = alpha*np.kron(Sx, Sx) + beta*np.kron(Sy, Sy) + (1-alpha-beta)*np.kron(Sz, Sz)
+
+    H0 = np.kron(np.eye(4), spinChainDrift.conjugate()) - np.kron(spinChainDrift, np.eye(4))
     drift = gamma * (-1j * H0) + Ham_part
 
     return (ctrls, drift)
@@ -101,7 +101,7 @@ def spinChainDrift_spinChain_dim_2x1(params):
 # Flag tf_result is set to true if the integration should be executed using tf objects
 ########################################################################################################################
 def integrate_lind(h, params, n_ts, evo_time, noise_name, tf_result):
-    alpha, gamma = params
+
 
     if noise_name == 'id_aSxbSy_spinChain_2x1':
         n = 16
@@ -109,6 +109,9 @@ def integrate_lind(h, params, n_ts, evo_time, noise_name, tf_result):
     elif noise_name == "aSxbSy_id_spinChain_dim_2x1":
         n = 16
         ctrls, drift = aSxbSy_id_spinChain_dim_2x1(params)
+    elif noise_name == "spinChainDrift_spinChain_dim_2x1":
+        n = 16
+        ctrls, drift = spinChainDrift_spinChain_dim_2x1(params)
 
     A = np.eye(n,dtype=complex)
 
