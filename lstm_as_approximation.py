@@ -16,6 +16,10 @@ from noise_models_and_integration import *
 from architecture import *
 from constants_of_experiments import *
 
+file = open("testfile.txt","w")
+
+file.write("Hello World\n")
+file.flush()
 def variation_acc2_local_disturb(sess,
                                  network,
                                  x_,
@@ -237,6 +241,8 @@ if __name__ == "__main__":
 
     gamma = params_list[int(argv[1])][0]
     alpha = params_list[int(argv[1])][1]
+    file.write("alpha="+str(alpha)+"\n")
+    file.flush()
 
     if testing_effectiveness:
         pathlib.Path("results/eff_fid_lstm/dim_{}".format(model_dim)).mkdir(parents=True, exist_ok=True)
@@ -244,6 +250,8 @@ if __name__ == "__main__":
 
         statistic = dict()
         for i in range(10):
+            file.write(str(i)+"\n")
+            file.flush()
             pred, acc = train_and_predict(n_ts,
                                       gamma,
                                       alpha,
@@ -293,4 +301,4 @@ if __name__ == "__main__":
                                                                                         gamma,
                                                                                         alpha,
                                                                                         eps_order), data)
-
+file.close()
