@@ -8,7 +8,7 @@ import numpy as np
 # For its value set to False, it performs experiment with local disturbances. In
 # this case it is necessary to have a trained network. One needs to perform at
 # least one experiment with value True before doing this.
-testing_effectiveness = False
+testing_effectiveness = True
 
 # size of the superoperator is dim^2
 supeop_size = 16
@@ -23,7 +23,7 @@ n_ts = 32
 # define appropriate model integrate_lind in noise_models_and_integration.py
 # TODO: change the names of everything
 # type of drift/noise
-noise_name = 'aSxbSy_id_spinChain_dim_2x1'
+noise_name = 'id_aSxbSy_spinChain_2x1'
 # noise_name = 'Sy_id_spChain'
 
 # dimension of the target
@@ -51,8 +51,8 @@ gamma = 0.2
 alpha = 0.0
 
 # there is possibility to examine performance of network for many parameters
-list_gammas = [0.2,0.4,0.6,0.8]
-list_alphas = [0.,0.2,0.5,0.8]
+list_gammas = [0.6,0.8]
+list_alphas = [0.,0.2]
 
 # constants for the approximation experiment
 accept_err = 0.1
