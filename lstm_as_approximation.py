@@ -1,4 +1,5 @@
 import os
+from sys import argv
 os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 import tensorflow as tf
 import numpy as np
@@ -234,38 +235,38 @@ if __name__ == "__main__":
     # Note: change the below value if you have already trained the network
     # train_model = True
 
-
+    gamma = params_list[int(argv[1])][0]
+    alpha = params_list[int(argv[1])][1]
 
     if testing_effectiveness:
         pathlib.Path("results/eff_fid_lstm/dim_{}".format(model_dim)).mkdir(parents=True, exist_ok=True)
         # main functionality
-        for gamma in list_gammas:
-            for alpha in list_alphas:
-                statistic = dict()
-                for i in range(10):
-                    pred, acc = train_and_predict(n_ts,
-                                              gamma,
-                                              alpha,
-                                              evo_time,
-                                              batch_size,
-                                              supeop_size,
-                                              controls_nb,
-                                              nb_epochs,
-                                              learning_rate,
-                                              train_set_size,
-                                              test_set_size,
-                                              size_of_lrs,
-                                              dim,
-                                              noise_name,
-                                              model_dim)
+
+        statistic = dict()
+        for i in range(10):
+            pred, acc = train_and_predict(n_ts,
+                                      gamma,
+                                      alpha,
+                                      evo_time,
+                                      batch_size,
+                                      supeop_size,
+                                      controls_nb,
+                                      nb_epochs,
+                                      learning_rate,
+                                      train_set_size,
+                                      test_set_size,
+                                      size_of_lrs,
+                                      dim,
+                                      noise_name,
+                                      model_dim)
 
 
-                    statistic[i] = acc
-                    # save the results
-                    np.savez("results/eff_fid_lstm/dim_{}/statistic_{}_gam_{}_alpha_{}".format(model_dim,
-                                                                                                 noise_name,
-                                                                                                 gamma,
-                                                                                                 alpha), statistic)
+            statistic[i] = acc
+            # save the results
+            np.savez("results/eff_fid_lstm/dim_{}/statistic_{}_gam_{}_alpha_{}".format(model_dim,
+                                                                                         noise_name,
+                                                                                         gamma,
+                                                                                         alpha), statistic)
     else:
 
          eps = 10**(-eps_order)

@@ -47,12 +47,13 @@ batch_size = 5
 controls_nb = 2
 
 # parameters controlling the noise
-gamma = 0.2
-alpha = 0.0
+#gamma = 0.2
+#alpha = 0.0
 
 # there is possibility to examine performance of network for many parameters
 list_gammas = [0.6,0.8]
 list_alphas = [0.,0.2]
+params_list = [(i, j) for i in list_gammas for j in list_gammas]
 
 # constants for the approximation experiment
 accept_err = 0.1
