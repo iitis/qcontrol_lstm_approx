@@ -38,7 +38,9 @@ Rc_y = np.kron(np.eye(2), Sy)
 ########################################################################################################################
 
 def id_aSxbSy_spinChain_2x1(params):
-    alpha, gamma = params
+    gamma, alpha = params
+    print("gamma= ", gamma)
+    print("alpha= ", alpha)
 
     Hc_x = np.kron(np.eye(4), Lc_x.conjugate()) - np.kron(Lc_x, np.eye(4))
     Hc_z = np.kron(np.eye(4), Lc_z.conjugate()) - np.kron(Lc_z, np.eye(4))
@@ -56,7 +58,10 @@ def id_aSxbSy_spinChain_2x1(params):
     return (ctrls, drift)
 
 def aSxbSy_id_spinChain_dim_2x1(params):
-    alpha, gamma = params
+    gamma, alpha = params
+    print("gamma= ", gamma)
+    print("alpha= ", alpha)
+
     Hc_x = np.kron(np.eye(4), Lc_x.conjugate()) - np.kron(Lc_x, np.eye(4))
     Hc_z = np.kron(np.eye(4), Lc_z.conjugate()) - np.kron(Lc_z, np.eye(4))
     ctrls = [-1j * Hc_x, -1j * Hc_z]
@@ -74,6 +79,10 @@ def aSxbSy_id_spinChain_dim_2x1(params):
 
 def spinChainDrift_spinChain_dim_2x1(params):
     gamma, alpha, beta = params
+    print("gamma= ", gamma)
+    print("alpha= ", alpha)
+    print("beta= ", beta)
+
     Hc_x = np.kron(np.eye(4), Lc_x.conjugate()) - np.kron(Lc_x, np.eye(4))
     Hc_z = np.kron(np.eye(4), Lc_z.conjugate()) - np.kron(Lc_z, np.eye(4))
     ctrls = [-1j * Hc_x, -1j * Hc_z]
