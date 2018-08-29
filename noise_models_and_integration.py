@@ -122,12 +122,13 @@ def integrate_lind(h, params, n_ts, evo_time, noise_name, tf_result):
         n = 16
         ctrls, drift = spinChainDrift_spinChain_dim_2x1(params)
 
+
     A = np.eye(n,dtype=complex)
 
     if tf_result:
         for i in range(n_ts):
             Hc = tf.convert_to_tensor(np.sum([h[i][j] * ctrls[j] for j in range(len(ctrls))], axis=0), dtype=tf.complex128)
-            A = tf.matmul(matrixExp(evo_time / n_ts * (drift + Hc), 20), A)
+            A = tf.matmul(matrixExp(evo_time / n_ts * (drift + Hc), 20), A, a_is_sparse=True,b_is_sparse=True)
     else:
         for i in range(n_ts):
             Hc = np.sum([h[i][j] * ctrls[j] for j in range(len(ctrls))], axis=0)
@@ -145,7 +146,7 @@ def matrixExp(X, precision):
 
     for i in range(1, precision):
         c = complex(i, 0)
-        powX = tf.matmul(powX, X) / c
+        powX = tf.matmul(powX, X, a_is_sparse=True,b_is_sparse=True) / c
         res += powX
     return res
 

@@ -89,6 +89,8 @@ def fit(sess,
 
         sess.run(tf.global_variables_initializer())
         j = -1
+        train_table = []
+        test_table = []
         for i in range(int(np.ceil(nb_epochs / (train_set_size // batch_size)))):
             for train_index, rand in kf.split(train_input, train_target):
                 j += 1
@@ -98,11 +100,12 @@ def fit(sess,
                     train_accuracy = sess.run( accuracy, feed_dict={x_: batch[0],
                                                                     y_: batch[1],
                                                                     keep_prob: 1.0})
+                    train_table.append(train_accuracy)
 
                     test_accuracy = accuracy.eval(feed_dict={x_: test_input[test_sample_indices],
                                                              y_: test_target[test_sample_indices],
                                                              keep_prob: 1.0})
-
+                    test_table.append(test_accuracy)
                     print("step %d, training accuracy %g" % (j, train_accuracy))
                     stdout.flush()
                     print("step %d, test accuracies %g" % (j, test_accuracy))
@@ -123,7 +126,7 @@ def fit(sess,
                                                  y_: test_target,
                                                  keep_prob: 1.})
 
-    return test_accuracy
+    return (test_accuracy,train_table,test_table)
 
 
 def get_prediction(sess, network, x_, keep_prob, test_input):

@@ -23,8 +23,7 @@ n_ts = 32
 # define appropriate model integrate_lind in noise_models_and_integration.py
 # TODO: change the names of everything
 # type of drift/noise
-
-if len(argv) > 1:
+if len(argv) == 2:
     argv_number = int(argv[1])
 else:
     argv_number = 0
@@ -52,7 +51,7 @@ train_set_size = 4000
 test_set_size = 1000
 
 # parameters of tensorflow
-nb_epochs = 50000
+nb_epochs = 60000
 learning_rate = 0.0001
 size_of_lrs = [200, 250, 350]
 batch_size = 5 

@@ -196,7 +196,7 @@ def train_and_predict(n_ts,
     with tf.Session(config=config) as sess:
 
         # training the network
-        acc = fit(sess,
+        (acc,train_table,test_table) = fit(sess,
                   network,
                   x_,
                   y_,
@@ -227,7 +227,7 @@ def train_and_predict(n_ts,
 
         sess.close()
     tf.reset_default_graph()
-    return (pred,acc)
+    return (pred,acc,train_table,test_table)
 
 
 # ---------------------------------------------------------------------------
@@ -247,7 +247,7 @@ if __name__ == "__main__":
 
         statistic = dict()
         for i in range(10):
-            pred, acc = train_and_predict(n_ts,
+            pred, acc, train_table, test_table = train_and_predict(n_ts,
                                       model_params,
                                       evo_time,
                                       batch_size,
@@ -263,7 +263,7 @@ if __name__ == "__main__":
                                       model_dim)
 
 
-            statistic[i] = acc
+            statistic[i] = (acc, train_table, test_table)
             # save the results
             if noise_name == "spinChainDrift_spinChain_dim_2x1":
                 # gamma, alpha, beta = model_params
