@@ -23,7 +23,12 @@ n_ts = 32
 # define appropriate model integrate_lind in noise_models_and_integration.py
 # TODO: change the names of everything
 # type of drift/noise
-argv_number = int(argv[1])
+
+if len(argv) > 1:
+    argv_number = int(argv[1])
+else:
+    argv_number = 10
+
 if argv_number < 100:
     noise_name = "aSxbSy_id_spinChain_dim_2x1"
 elif ((argv_number >= 100) and (argv_number < 200)):
