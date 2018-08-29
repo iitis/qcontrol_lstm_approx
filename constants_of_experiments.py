@@ -27,7 +27,7 @@ n_ts = 32
 if len(argv) > 1:
     argv_number = int(argv[1])
 else:
-    argv_number = 10
+    argv_number = 0
 
 if argv_number < 100:
     noise_name = "aSxbSy_id_spinChain_dim_2x1"

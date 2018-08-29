@@ -98,11 +98,7 @@ if __name__ == '__main__':
 
     pathlib.Path("training/dim_{}/mtx".format(model_dim)).mkdir(parents=True, exist_ok=True)
 
-    pathlib.Path("training/dim_{}/NCP_data".format(model_dim,
-                                                   noise_name,
-                                                   ctrl_init,
-                                                   n_ts,
-                                                   gamma)).mkdir(parents=True, exist_ok=True)
+    pathlib.Path("training/dim_{}/NCP_data".format(model_dim)).mkdir(parents=True, exist_ok=True)
 
     para_generate = partial(generate_training_sample, ctrl_init=ctrl_init,
                             initial=initial, params=params,
