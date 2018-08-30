@@ -115,7 +115,7 @@ def fit(sess,
                 sess.run(optimizer,
                          feed_dict={x_: batch[0],
                                     y_: batch[1],
-                                    keep_prob: 0.5})#,options=options, run_metadata=run_metadata)
+                                    keep_prob: 1.})#,options=options, run_metadata=run_metadata)
 
                 # fetched_timeline = timeline.Timeline(run_metadata.step_stats)
                 # chrome_trace = fetched_timeline.generate_chrome_trace_format()

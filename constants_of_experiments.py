@@ -53,7 +53,7 @@ test_set_size = 1000
 # parameters of tensorflow
 nb_epochs = 60000
 learning_rate = 0.0001
-size_of_lrs = [200, 250, 350]
+size_of_lrs = [300, 350, 400]
 batch_size = 5 
 
 # part of architecture determined by the shape of data
