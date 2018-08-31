@@ -2,7 +2,7 @@ import tensorflow as tf
 from functools import partial
 from sys import stdout
 from sklearn.model_selection import KFold
-
+import time
 from tensorflow.python.client import timeline
 
 from noise_models_and_integration import *
@@ -32,7 +32,7 @@ def my_lstm(x_,controls_nb, size_of_lrs, keep_prob):
     cells = []
     for n_units in size_of_lrs:
         cell = tf.nn.rnn_cell.LSTMCell(num_units=n_units, use_peepholes=True)
-        cell = tf.nn.rnn_cell.DropoutWrapper(cell=cell, output_keep_prob=keep_prob)
+        # cell = tf.nn.rnn_cell.DropoutWrapper(cell=cell, output_keep_prob=keep_prob)
         cells.append(cell)
 
     outputs = tf.contrib.rnn.stack_bidirectional_dynamic_rnn(
@@ -42,8 +42,24 @@ def my_lstm(x_,controls_nb, size_of_lrs, keep_prob):
         dtype=tf.float32,
         parallel_iterations=32
     )
+    for one_lstm_cell in cells:
 
+        one_kernel, one_bias,w_f_diag,w_i_diag, w_o_diag = one_lstm_cell.variables
+        # I think TensorBoard handles summaries with the same name fine.
+        tf.summary.histogram("Kernel", one_kernel)
+        tf.summary.histogram("Bias", one_bias)
+        tf.summary.histogram("w_f_diag", w_f_diag)
+        tf.summary.histogram("w_i_diag", w_i_diag)
+        tf.summary.histogram("w_o_diag", w_o_diag)
+
+    print(outputs[2])
     output_fw, output_bw= tf.split(outputs[0], 2, axis=2)
+    tf.summary.histogram("output_fw", output_fw)
+    tf.summary.histogram("output_bw", output_bw)
+    tf.summary.histogram("cell_fw", outputs[1][0])
+    # tf.summary.histogram("hidden_fw", outputs[1][1])
+    tf.summary.histogram("cell_bw", outputs[2][0])
+    # tf.summary.histogram("hidden_bw", outputs[2][1])
     sum_fw_bw = tf.add(output_fw, output_bw)
     squeezed_layer = tf.reshape(sum_fw_bw, [-1, size_of_lrs[-1]])
     droput = tf.nn.dropout(squeezed_layer, keep_prob)
@@ -72,13 +88,16 @@ def fit(sess,
       dim,
       noise_name):
 
+    tensorboard_path = 'tensorboard/' + str(time.ctime())
+
 
     optimizer, accuracy = fidelity_cost_fn(network, y_, learning_rate, model_params, n_ts, evo_time,dim, noise_name)
 
 
     # 500 is the number of test samples used in monitoring the efficiency of the network
     test_sample_indices = np.arange(500)
-
+    merged = tf.summary.merge_all()
+    train_writer = tf.summary.FileWriter(tensorboard_path, sess.graph)
     kf = KFold(n_splits=(train_set_size//batch_size), shuffle = True)
     print(np.shape(test_input))
     # LEARNING LOOP
@@ -95,9 +114,10 @@ def fit(sess,
             for train_index, rand in kf.split(train_input, train_target):
                 j += 1
                 batch = (train_input[rand], train_target[rand])
+                # batch = (train_input[(j%train_set_size):((j+batch_size)%train_set_size)], train_target[(j%train_set_size):((j+batch_size)%train_set_size)])
                 # MONITORING OF EFFICENCY
                 if j % 1000 == 0:
-                    train_accuracy = sess.run( accuracy, feed_dict={x_: batch[0],
+                    summary, train_accuracy = sess.run( [merged, accuracy], feed_dict={x_: batch[0],
                                                                     y_: batch[1],
                                                                     keep_prob: 1.0})
                     train_table.append(train_accuracy)
@@ -106,6 +126,7 @@ def fit(sess,
                                                              y_: test_target[test_sample_indices],
                                                              keep_prob: 1.0})
                     test_table.append(test_accuracy)
+                    train_writer.add_summary(summary, j)
                     print("step %d, training accuracy %g" % (j, train_accuracy))
                     stdout.flush()
                     print("step %d, test accuracies %g" % (j, test_accuracy))

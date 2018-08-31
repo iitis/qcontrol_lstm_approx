@@ -244,7 +244,6 @@ if __name__ == "__main__":
     if testing_effectiveness:
         pathlib.Path("results/eff_fid_lstm/dim_{}".format(model_dim)).mkdir(parents=True, exist_ok=True)
         # main functionality
-
         statistic = dict()
         for i in range(10):
             pred, acc, train_table, test_table = train_and_predict(n_ts,

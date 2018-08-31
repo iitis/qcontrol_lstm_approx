@@ -53,8 +53,12 @@ test_set_size = 1000
 # parameters of tensorflow
 nb_epochs = 60000
 learning_rate = 0.0001
-size_of_lrs = [300, 350, 400]
-batch_size = 5 
+size_of_lrs = [700]
+batch_size = 5
+print("nb_epochs",nb_epochs)
+print("learning_rate",learning_rate)
+print("size_of_lrs",size_of_lrs)
+print("batch_size",batch_size)
 
 # part of architecture determined by the shape of data
 controls_nb = 2
