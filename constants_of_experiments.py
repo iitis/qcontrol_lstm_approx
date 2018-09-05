@@ -30,10 +30,10 @@ else:
 
 if argv_number < 100:
     noise_name = "aSxbSy_id_spinChain_dim_2x1"
-elif ((argv_number >= 100) and (argv_number < 200)):
+elif 100 <= argv_number < 200:
     noise_name = 'id_aSxbSy_spinChain_2x1'
     argv_number -= 100
-elif ((argv_number >= 200) and (argv_number < 300)):
+elif 200 <= argv_number < 300:
     noise_name = 'spinChainDrift_spinChain_dim_2x1'
     argv_number -= 200
 
@@ -46,15 +46,15 @@ ctrl_init = 'ZERO'
 
 # parameters depending on the available number of samples
 # number of control pulses for training
-train_set_size = 4000
+train_set_size = 8000
 # number of control pulses for testing
 test_set_size = 1000
 
 # parameters of tensorflow
 nb_epochs = 60000
 learning_rate = 0.0001
-size_of_lrs = [700]
-batch_size = 5
+size_of_lrs = [200,300,400]
+batch_size = 50
 print("nb_epochs",nb_epochs)
 print("learning_rate",learning_rate)
 print("size_of_lrs",size_of_lrs)

@@ -23,6 +23,7 @@ def fidelity_cost_fn(network,y_, learning_rate, params, n_ts, evo_time,dim, nois
     tf.summary.scalar('loss_func', loss)
 
     optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss)
+    # optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate,momentum=0.9).minimize(loss)
     accuracy = tf.cast(tf.reduce_mean(1 - batch_of_fid_err), tf.float32)
     return (optimizer, accuracy)
 
@@ -32,9 +33,11 @@ def my_lstm(x_,controls_nb, size_of_lrs, keep_prob):
     cells = []
     for n_units in size_of_lrs:
         cell = tf.nn.rnn_cell.LSTMCell(num_units=n_units, use_peepholes=True)
-        # cell = tf.nn.rnn_cell.DropoutWrapper(cell=cell, output_keep_prob=keep_prob)
+        # cell = tf.nn.rnn_cell.GRUCell(num_units=n_units)
+        cell = tf.nn.rnn_cell.DropoutWrapper(cell=cell, output_keep_prob=keep_prob)
         cells.append(cell)
 
+    print("yes dropout wrapper")
     outputs = tf.contrib.rnn.stack_bidirectional_dynamic_rnn(
         cells_fw=cells,
         cells_bw=cells,
@@ -42,24 +45,25 @@ def my_lstm(x_,controls_nb, size_of_lrs, keep_prob):
         dtype=tf.float32,
         parallel_iterations=32
     )
-    for one_lstm_cell in cells:
-
-        one_kernel, one_bias,w_f_diag,w_i_diag, w_o_diag = one_lstm_cell.variables
-        # I think TensorBoard handles summaries with the same name fine.
-        tf.summary.histogram("Kernel", one_kernel)
-        tf.summary.histogram("Bias", one_bias)
-        tf.summary.histogram("w_f_diag", w_f_diag)
-        tf.summary.histogram("w_i_diag", w_i_diag)
-        tf.summary.histogram("w_o_diag", w_o_diag)
+    # for one_lstm_cell in cells:
+    #     print(one_lstm_cell.variables)
+    #     one_kernel, one_bias,w_f_diag,w_i_diag, w_o_diag = one_lstm_cell.variables
+    #     # one_kernel, one_bias, two_kernel, two_bias = one_lstm_cell.variables
+    #     tf.summary.histogram("Kernel", one_kernel)
+    #     tf.summary.histogram("Bias", one_bias)
+    #     # tf.summary.histogram("Kernel2", two_kernel)
+    #     # tf.summary.histogram("Bias2", two_bias)
+    #
+    #     tf.summary.histogram("w_f_diag", w_f_diag)
+    #     tf.summary.histogram("w_i_diag", w_i_diag)
+    #     tf.summary.histogram("w_o_diag", w_o_diag)
 
     print(outputs[2])
     output_fw, output_bw= tf.split(outputs[0], 2, axis=2)
     tf.summary.histogram("output_fw", output_fw)
     tf.summary.histogram("output_bw", output_bw)
     tf.summary.histogram("cell_fw", outputs[1][0])
-    # tf.summary.histogram("hidden_fw", outputs[1][1])
     tf.summary.histogram("cell_bw", outputs[2][0])
-    # tf.summary.histogram("hidden_bw", outputs[2][1])
     sum_fw_bw = tf.add(output_fw, output_bw)
     squeezed_layer = tf.reshape(sum_fw_bw, [-1, size_of_lrs[-1]])
     droput = tf.nn.dropout(squeezed_layer, keep_prob)
@@ -136,7 +140,7 @@ def fit(sess,
                 sess.run(optimizer,
                          feed_dict={x_: batch[0],
                                     y_: batch[1],
-                                    keep_prob: 1.})#,options=options, run_metadata=run_metadata)
+                                    keep_prob: 0.5})#,options=options, run_metadata=run_metadata)
 
                 # fetched_timeline = timeline.Timeline(run_metadata.step_stats)
                 # chrome_trace = fetched_timeline.generate_chrome_trace_format()
