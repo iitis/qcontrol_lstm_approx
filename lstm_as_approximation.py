@@ -1,6 +1,6 @@
 import os
 from sys import argv, stdout
-os.environ["CUDA_VISIBLE_DEVICES"]="-1"
+# os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 import tensorflow as tf
 import numpy as np
 import scipy
@@ -266,7 +266,7 @@ if __name__ == "__main__":
             # save the results
             if noise_name == "spinChainDrift_spinChain_dim_2x1":
                 # gamma, alpha, beta = model_params
-                np.savez("results/eff_fid_lstm/dim_{}/statistic_{}_gam_{}_alpha_{}".format(model_dim,
+                np.savez("results/eff_fid_lstm/dim_{}/statistic_{}_gam_{}_alpha_{}_beta_{}".format(model_dim,
                                                                                            noise_name,
                                                                                            gamma,
                                                                                            alpha, beta), statistic)

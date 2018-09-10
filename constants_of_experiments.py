@@ -46,9 +46,9 @@ ctrl_init = 'ZERO'
 
 # parameters depending on the available number of samples
 # number of control pulses for training
-train_set_size = 8000
+train_set_size = 4000
 # number of control pulses for testing
-test_set_size = 1000
+test_set_size = 4000
 
 # parameters of tensorflow
 nb_epochs = 60000
@@ -72,10 +72,11 @@ if noise_name == "spinChainDrift_spinChain_dim_2x1":
     list_gammas = [0.6, 0.8]
     list_alphas = [0., 0.1, 0.2]
     list_betas = [1., 0.8, 0.6]
-    params_list = [(i, j, k) for i in list_gammas for j in list_alphas for k in list_betas]
+    params_list = [(0.6,0.,1.),(0.6,0.1,0.8),(0.6,0.1,0.6),(0.6,0.2,0.6),(0.6,0.3,0.6),
+                   (0.8,0.,1.),(0.8,0.1,0.8),(0.8,0.1,0.6),(0.8,0.2,0.6),(0.8,0.3,0.6)]#[(i, j, k) for i in list_gammas for j in list_alphas for k in list_betas]
 else:
-    list_gammas = [0.6,0.8]
-    list_alphas = [0.,0.2]
+    list_gammas = [0.2,0.4,0.6,0.8]
+    list_alphas = [0.,0.2,0.5]
     params_list = [(i, j) for i in list_gammas for j in list_alphas]
 
 if noise_name == "spinChainDrift_spinChain_dim_2x1":

@@ -128,7 +128,7 @@ def integrate_lind(h, params, n_ts, evo_time, noise_name, tf_result):
     if tf_result:
         for i in range(n_ts):
             Hc = tf.convert_to_tensor(np.sum([h[i][j] * ctrls[j] for j in range(len(ctrls))], axis=0), dtype=tf.complex128)
-            A = tf.matmul(matrixExp(evo_time / n_ts * (drift + Hc), 20), A, a_is_sparse=True,b_is_sparse=True)
+            A = tf.matmul(matrixExp(evo_time / n_ts * (drift + Hc), 10), A, a_is_sparse=True,b_is_sparse=True)
             # A = tf.matmul(tf.linalg.expm(evo_time / n_ts * (drift + Hc)), A)
     else:
         for i in range(n_ts):
