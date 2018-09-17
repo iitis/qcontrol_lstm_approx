@@ -7,31 +7,31 @@ from tensorflow.python.client import timeline
 
 from noise_models_and_integration import *
 
-def fidelity_cost_fn(network,y_, params):
+def fidelity_cost_fn(network,y_, learning_rate, params, n_ts, evo_time,dim, noise_name):
 
-    tmp_integrate_lind = partial(integrate_lind, noise_params=params.noise_params, n_ts=params.n_ts, evo_time=params.evo_time, noise_name=params.noise_name, tf_result=True)
+    tmp_integrate_lind = partial(integrate_lind, params=params, n_ts=n_ts, evo_time=evo_time, noise_name=noise_name, tf_result=True)
     net = tf.cast(network, tf.complex128)
 
     ctrls_to_mtx = tf.map_fn(tmp_integrate_lind, net)  # new batch in which instead of control pulses i have matrices
 
     batch_to_loss_fn = tf.stack([y_, ctrls_to_mtx], axis=1)  # create tensor of pairs (target, generated_matrix)
-    tmp_fid_err = partial(fidelity_err, dim=params.dim, tf_result=True)
+    tmp_fid_err = partial(fidelity_err, dim=dim, tf_result=True)
     batch_of_fid_err = tf.map_fn(tmp_fid_err, batch_to_loss_fn, dtype=tf.float32)  # batch of fidelity errors
 
     loss = tf.cast(tf.reduce_mean(batch_of_fid_err),
                    tf.float32)  # loss function, which is a mean of fid_erros over batch
     tf.summary.scalar('loss_func', loss)
 
-    optimizer = tf.train.AdamOptimizer(learning_rate=params.learning_rate).minimize(loss)
+    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss)
     # optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate,momentum=0.9).minimize(loss)
     accuracy = tf.cast(tf.reduce_mean(1 - batch_of_fid_err), tf.float32)
     return (optimizer, accuracy)
 
-def my_lstm(x_,keep_prob, params):
+def my_lstm(x_,controls_nb, size_of_lrs, keep_prob):
     # 'layers' is a list of the number of the units on each layer
 
     cells = []
-    for n_units in params.size_of_lrs:
+    for n_units in size_of_lrs:
         cell = tf.nn.rnn_cell.LSTMCell(num_units=n_units, use_peepholes=True)
         # cell = tf.nn.rnn_cell.GRUCell(num_units=n_units)
         cell = tf.nn.rnn_cell.DropoutWrapper(cell=cell, output_keep_prob=keep_prob)
@@ -68,7 +68,7 @@ def my_lstm(x_,keep_prob, params):
     squeezed_layer = tf.reshape(sum_fw_bw, [-1, size_of_lrs[-1]])
     droput = tf.nn.dropout(squeezed_layer, keep_prob)
     dense = tf.contrib.layers.fully_connected(droput, controls_nb, activation_fn=tf.nn.tanh)
-    output = tf.reshape(dense, [tf.shape(x_)[0],tf.shape(x_)[1], params.controls_nb])
+    output = tf.reshape(dense, [tf.shape(x_)[0],tf.shape(x_)[1], controls_nb])
     return output
 
 
@@ -82,19 +82,27 @@ def fit(sess,
       train_target,
       test_input,
       test_target,
-      params):
+      nb_epochs,
+      batch_size,
+      train_set_size,
+      learning_rate,
+      model_params,
+      n_ts,
+      evo_time,
+      dim,
+      noise_name):
 
     tensorboard_path = 'tensorboard/' + str(time.ctime())
 
 
-    optimizer, accuracy = fidelity_cost_fn(network, y_, params)
+    optimizer, accuracy = fidelity_cost_fn(network, y_, learning_rate, model_params, n_ts, evo_time,dim, noise_name)
 
 
     # 500 is the number of test samples used in monitoring the efficiency of the network
     test_sample_indices = np.arange(500)
     merged = tf.summary.merge_all()
     train_writer = tf.summary.FileWriter(tensorboard_path, sess.graph)
-    kf = KFold(n_splits=(params.train_set_size//params.batch_size), shuffle = True)
+    kf = KFold(n_splits=(train_set_size//batch_size), shuffle = True)
     print(np.shape(test_input))
     # LEARNING LOOP
     with sess.as_default():
@@ -106,7 +114,7 @@ def fit(sess,
         j = -1
         train_table = []
         test_table = []
-        for i in range(int(np.ceil(params.nb_epochs / (params.train_set_size // params.batch_size)))):
+        for i in range(int(np.ceil(nb_epochs / (train_set_size // batch_size)))):
             for train_index, rand in kf.split(train_input, train_target):
                 j += 1
                 batch = (train_input[rand], train_target[rand])
