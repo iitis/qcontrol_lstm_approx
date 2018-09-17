@@ -106,6 +106,9 @@ if __name__ == '__main__':
                             model_dim=model_dim)
 
     # change 8 to your number of cores
-    with Pool(10) as p:
-        p.map(para_generate, np.arange(number_of_samples))
+    # with Pool(10) as p:
+    #     p.map(para_generate, np.arange(100))
+
+    for i in range(10000,12000):
+        para_generate(i)
                           

@@ -46,12 +46,12 @@ ctrl_init = 'ZERO'
 
 # parameters depending on the available number of samples
 # number of control pulses for training
-train_set_size = 4000
+train_set_size = 8000
 # number of control pulses for testing
 test_set_size = 4000
 
 # parameters of tensorflow
-nb_epochs = 60000
+nb_epochs = 100000
 learning_rate = 0.0001
 size_of_lrs = [200,300,400]
 batch_size = 50
