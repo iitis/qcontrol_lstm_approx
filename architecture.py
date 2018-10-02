@@ -33,9 +33,11 @@ def my_lstm(x_,controls_nb, size_of_lrs, keep_prob):
     cells = []
     for n_units in size_of_lrs:
         cell = tf.nn.rnn_cell.LSTMCell(num_units=n_units, use_peepholes=True)
+
         # cell = tf.nn.rnn_cell.GRUCell(num_units=n_units)
         cell = tf.nn.rnn_cell.DropoutWrapper(cell=cell, output_keep_prob=keep_prob)
         cells.append(cell)
+    cells
 
     print("yes dropout wrapper")
     outputs = tf.contrib.rnn.stack_bidirectional_dynamic_rnn(

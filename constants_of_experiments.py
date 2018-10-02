@@ -8,7 +8,7 @@ from sys import argv, stdout
 # For its value set to False, it performs experiment with local disturbances. In
 # this case it is necessary to have a trained network. One needs to perform at
 # least one experiment with value True before doing this.
-testing_effectiveness = True
+testing_effectiveness = False
 
 # size of the superoperator is dim^2
 supeop_size = 16
@@ -48,13 +48,13 @@ ctrl_init = 'ZERO'
 # number of control pulses for training
 train_set_size = 8000
 # number of control pulses for testing
-test_set_size = 4000
+test_set_size = 2000
 
 # parameters of tensorflow
-nb_epochs = 100000
+nb_epochs = 60000
 learning_rate = 0.0001
 size_of_lrs = [200,300,400]
-batch_size = 50
+batch_size = 10
 print("nb_epochs",nb_epochs)
 print("learning_rate",learning_rate)
 print("size_of_lrs",size_of_lrs)
@@ -75,8 +75,8 @@ if noise_name == "spinChainDrift_spinChain_dim_2x1":
     params_list = [(0.6,0.,1.),(0.6,0.1,0.8),(0.6,0.1,0.6),(0.6,0.2,0.6),(0.6,0.3,0.6),
                    (0.8,0.,1.),(0.8,0.1,0.8),(0.8,0.1,0.6),(0.8,0.2,0.6),(0.8,0.3,0.6)]#[(i, j, k) for i in list_gammas for j in list_alphas for k in list_betas]
 else:
-    list_gammas = [0.2,0.4,0.6,0.8]
-    list_alphas = [0.,0.2,0.5]
+    list_gammas = [0.2]
+    list_alphas = [0.]
     params_list = [(i, j) for i in list_gammas for j in list_alphas]
 
 if noise_name == "spinChainDrift_spinChain_dim_2x1":

@@ -59,8 +59,8 @@ def id_aSxbSy_spinChain_2x1(params):
 
 def aSxbSy_id_spinChain_dim_2x1(params):
     gamma, alpha = params
-    print("gamma= ", gamma)
-    print("alpha= ", alpha)
+    # print("gamma= ", gamma)
+    # print("alpha= ", alpha)
 
     Hc_x = np.kron(np.eye(4), Lc_x.conjugate()) - np.kron(Lc_x, np.eye(4))
     Hc_z = np.kron(np.eye(4), Lc_z.conjugate()) - np.kron(Lc_z, np.eye(4))
@@ -128,7 +128,7 @@ def integrate_lind(h, params, n_ts, evo_time, noise_name, tf_result):
     if tf_result:
         for i in range(n_ts):
             Hc = tf.convert_to_tensor(np.sum([h[i][j] * ctrls[j] for j in range(len(ctrls))], axis=0), dtype=tf.complex128)
-            A = tf.matmul(matrixExp(evo_time / n_ts * (drift + Hc), 10), A, a_is_sparse=True,b_is_sparse=True)
+            A = tf.matmul(matrixExp(evo_time / n_ts * (drift + Hc), 8), A, a_is_sparse=True,b_is_sparse=True)
             # A = tf.matmul(tf.linalg.expm(evo_time / n_ts * (drift + Hc)), A)
     else:
         for i in range(n_ts):

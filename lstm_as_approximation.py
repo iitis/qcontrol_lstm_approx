@@ -11,7 +11,7 @@ from tensorflow.python.client import timeline
 
 from get_data import *
 import pathlib
-
+import time
 from noise_models_and_integration import *
 from architecture import *
 from constants_of_experiments import *
@@ -42,29 +42,31 @@ def variation_acc2_local_disturb(sess,
     print(len(test_input))
     print(np.shape(results))
     iter = -1
-
+    tf_result = False
     for sample_nb in range(len(np.array(test_input))):
 
         # taking sample NCP
         origin_NCP = test_input[sample_nb]
+        # origin_NCP = np.asarray(list(zip(origin_NCP[:,1],origin_NCP[:,0])))[::-1]
         # taking target superoperator corresponding to the NCP
         origin_superoperator = test_target[sample_nb]
-        tf_result = False
+        # origin_superoperator = integrate_lind(origin_NCP, (0., 0.), n_ts, evo_time, noise_name, tf_result)
+
 
 
         # calculating nnDCP corresponding to input NCP
         pred_DCP = get_prediction(sess, network, x_, keep_prob, np.reshape(origin_NCP, [1, n_ts, controls_nb]))
         # calculating superoperator from nnDCP
-        sup_from_pred_DCP = integrate_lind(pred_DCP[0], (alpha, gamma), n_ts, evo_time, noise_name, tf_result)
+        sup_from_pred_DCP = integrate_lind(pred_DCP[0], (gamma, alpha), n_ts, evo_time, noise_name, tf_result)
 
         print("sanity check")
-        acceptable_error = fidelity_err([origin_superoperator, sup_from_pred_DCP], dim, tf_result)
-        print("predicted DCP", acceptable_error)
+        error_of_DCP= fidelity_err([origin_superoperator, sup_from_pred_DCP], dim, tf_result)
+        print("predicted DCP", error_of_DCP)
         print("---------------------------------")
 
         ############################################################################################################
         #if sanity test is above assumed error then the experiment is performed
-        if acceptable_error <= accept_err:
+        if error_of_DCP <= accept_err:
             iter += 1
             # iteration over all coordinates
             for (t, c) in prod(range(n_ts), range(controls_nb)):
@@ -74,10 +76,12 @@ def variation_acc2_local_disturb(sess,
                 else:
                     new_NCP[t, c] -= eps
 
-                sup_from_new_NCP = integrate_lind(new_NCP, (alpha, 0.), n_ts, evo_time, noise_name, tf_result)
+                sup_from_new_NCP = integrate_lind(new_NCP, (0., 0.), n_ts, evo_time, noise_name, tf_result)
                 new_DCP = get_prediction(sess, network, x_, keep_prob,
                                          np.reshape(new_NCP, [1, n_ts, controls_nb]))
-                sup_form_new_DCP = integrate_lind(new_DCP[0], (alpha, gamma), n_ts, evo_time, noise_name, tf_result)
+
+                sup_form_new_DCP = integrate_lind(new_DCP[0], (gamma, alpha), n_ts, evo_time, noise_name, tf_result)
+
                 error = fidelity_err([sup_from_new_NCP, sup_form_new_DCP], dim, tf_result)
 
                 #print(error)
@@ -91,6 +95,7 @@ def variation_acc2_local_disturb(sess,
 
     print(np.shape(results))
     return results
+
 
 def experiment_loc_disturb(n_ts,
                           gamma,
@@ -192,7 +197,10 @@ def train_and_predict(n_ts,
 
     # maintaining the memory
     config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True
+    # config.gpu_options.allow_growth = True
+    config.intra_op_parallelism_threads = 44
+    config.inter_op_parallelism_threads = 44
+
     with tf.Session(config=config) as sess:
 
         # training the network
@@ -233,7 +241,7 @@ def train_and_predict(n_ts,
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-
+    # time.sleep(3600 * 15)
     # prepare dirs for the output files
     pathlib.Path("weights/dim_{}/{}".format(model_dim, noise_name)).mkdir(parents=True, exist_ok=True)
 
@@ -245,7 +253,7 @@ if __name__ == "__main__":
         pathlib.Path("results/eff_fid_lstm/dim_{}".format(model_dim)).mkdir(parents=True, exist_ok=True)
         # main functionality
         statistic = dict()
-        for i in range(10):
+        for i in range(1):
             pred, acc, train_table, test_table = train_and_predict(n_ts,
                                       model_params,
                                       evo_time,
@@ -284,18 +292,18 @@ if __name__ == "__main__":
 
          # main functionality
          data = experiment_loc_disturb(n_ts,
-                                      gamma,
-                                      alpha,
-                                      evo_time,
-                                      supeop_size,
-                                      controls_nb,
-                                      train_set_size,
-                                      test_set_size,
-                                      size_of_lrs,
-                                      noise_name,
-                                      model_dim,
-                                      eps,
-                                      accept_err)
+                          gamma,
+                          alpha,
+                          evo_time,
+                          supeop_size,
+                          controls_nb,
+                          train_set_size,
+                          test_set_size,
+                          size_of_lrs,
+                          noise_name,
+                          model_dim,
+                          eps,
+                          accept_err)
 
          pathlib.Path("results/NN_as_approx/dim_{}".format(model_dim)).mkdir(parents=True, exist_ok=True)
          np.savez("results/NN_as_approx/dim_{}/{}_gam_{}_alpha_{}_epsilon_1e-{}".format(model_dim,
