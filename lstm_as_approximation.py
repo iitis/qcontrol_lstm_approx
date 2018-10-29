@@ -280,7 +280,7 @@ if __name__ == "__main__":
                                                                                            alpha, beta), statistic)
             else:
                 # gamma, alpha = model_params
-                np.savez("results/eff_fid_lstm_undbounded/dim_{}/statistic_{}_gam_{}_alpha_{}".format(model_dim,
+                np.savez("results/eff_fid_lstm_unbounded/dim_{}/statistic_{}_gam_{}_alpha_{}".format(model_dim,
                                                                                            noise_name,
                                                                                            gamma,
                                                                                            alpha), statistic)
