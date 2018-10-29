@@ -8,7 +8,7 @@ from sys import argv, stdout
 # For its value set to False, it performs experiment with local disturbances. In
 # this case it is necessary to have a trained network. One needs to perform at
 # least one experiment with value True before doing this.
-testing_effectiveness = False
+testing_effectiveness = True
 
 # size of the superoperator is dim^2
 supeop_size = 16
@@ -19,6 +19,12 @@ evo_time = 6
 
 # number of times slots
 n_ts = 32
+
+
+#NCP bounded or not bounded (formally not bouned is bounded from -42 to 42)
+
+# data_type = "NCP_data"
+data_type = "NCP_data_unbounded"
 
 # define appropriate model integrate_lind in noise_models_and_integration.py
 # TODO: change the names of everything
@@ -36,6 +42,10 @@ elif 100 <= argv_number < 200:
 elif 200 <= argv_number < 300:
     noise_name = 'spinChainDrift_spinChain_dim_2x1'
     argv_number -= 200
+elif 300 <= argv_number < 400:
+    noise_name = 'Sz_and_ketbra01_Lindbald_spinChain_drift'
+    argv_number -= 300
+
 
 # noise_name = 'Sy_id_spChain'
 
@@ -48,7 +58,7 @@ ctrl_init = 'ZERO'
 # number of control pulses for training
 train_set_size = 8000
 # number of control pulses for testing
-test_set_size = 2000
+test_set_size = 500
 
 # parameters of tensorflow
 nb_epochs = 60000
@@ -75,7 +85,7 @@ if noise_name == "spinChainDrift_spinChain_dim_2x1":
     params_list = [(0.6,0.,1.),(0.6,0.1,0.8),(0.6,0.1,0.6),(0.6,0.2,0.6),(0.6,0.3,0.6),
                    (0.8,0.,1.),(0.8,0.1,0.8),(0.8,0.1,0.6),(0.8,0.2,0.6),(0.8,0.3,0.6)]#[(i, j, k) for i in list_gammas for j in list_alphas for k in list_betas]
 else:
-    list_gammas = [0.2]
+    list_gammas = [0.2,0.6]
     list_alphas = [0.]
     params_list = [(i, j) for i in list_gammas for j in list_alphas]
 

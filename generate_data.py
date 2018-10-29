@@ -77,14 +77,14 @@ def generate_training_sample(unit_nb, ctrl_init, initial, params, n_ts,evo_time,
 
     drift = Qobj(drift)
 
-    result = cpo.optimize_pulse(drift, ctrls, initial, target_DP, n_ts, evo_time, amp_lbound=-1, amp_ubound=1,
+    result = cpo.optimize_pulse(drift, ctrls, initial, target_DP, n_ts, evo_time, amp_lbound=-42, amp_ubound=42,
                                 fid_err_targ=fid_err_targ, min_grad=min_grad,
                                 max_iter=max_iter, max_wall_time=max_wall_time,
                                 out_file_ext=f_ext, init_pulse_type=ctrl_init,
                                 log_level=log_level, gen_stats=True)
     print("Sample number ", unit_nb, " have error ", result.fid_err)
 
-    np.savez("training/dim_{}/NCP_data/idx_{}".format(model_dim,
+    np.savez("training/dim_{}/NCP_data_unbounded/idx_{}".format(model_dim,
                                                      unit_nb),result.final_amps)
 
 if __name__ == '__main__':
@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
     pathlib.Path("training/dim_{}/mtx".format(model_dim)).mkdir(parents=True, exist_ok=True)
 
-    pathlib.Path("training/dim_{}/NCP_data".format(model_dim)).mkdir(parents=True, exist_ok=True)
+    pathlib.Path("training/dim_{}/NCP_data_unbounded".format(model_dim)).mkdir(parents=True, exist_ok=True)
 
     para_generate = partial(generate_training_sample, ctrl_init=ctrl_init,
                             initial=initial, params=params,
@@ -106,9 +106,9 @@ if __name__ == '__main__':
                             model_dim=model_dim)
 
     # change 8 to your number of cores
-    # with Pool(10) as p:
-    #     p.map(para_generate, np.arange(100))
+    with Pool(10) as p:
+        p.map(para_generate, np.arange(12000))
 
-    for i in range(10000,12000):
-        para_generate(i)
+    # for i in range(12000):
+    #     para_generate(i)
                           

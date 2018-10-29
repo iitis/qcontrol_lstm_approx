@@ -2,7 +2,8 @@ import numpy as np
 
 def get_data(train_set_size,
             test_set_size,
-            model_dim):
+            model_dim,
+             data_type):
 
     train_input = []
     train_target = []
@@ -14,8 +15,8 @@ def get_data(train_set_size,
         print("Test set overlaps with the training set!")
 
     for i in train_indices:
-        input = np.asarray(np.load("training/dim_{}/NCP_data/idx_{}.npz".format(
-            model_dim, i))['arr_0'])
+        input = np.asarray(np.load("training/dim_{}/{}/idx_{}.npz".format(
+            model_dim,data_type, i))['arr_0'])
         u = np.asarray(np.load("training/dim_{}/mtx/idx_{}.npz".format(model_dim, i))['arr_0'])
         superoperator = np.kron(u, u.conjugate())
 
@@ -23,8 +24,8 @@ def get_data(train_set_size,
         train_target.append(superoperator)
 
     for i in test_indices:
-        input = np.asarray(np.load("training/dim_{}/NCP_data/idx_{}.npz".format(
-            model_dim, i))['arr_0'])
+        input = np.asarray(np.load("training/dim_{}/{}/idx_{}.npz".format(
+            model_dim,data_type, i))['arr_0'])
         u = np.asarray(np.load("training/dim_{}/mtx/idx_{}.npz".format(model_dim, i))['arr_0'])
         superoperator = np.kron(u, u.conjugate())
 

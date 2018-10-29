@@ -127,7 +127,7 @@ def experiment_loc_disturb(n_ts,
     saver = tf.train.Saver()
 
     # loading the data
-    (_, _, test_input, test_target) = get_data(train_set_size, test_set_size, model_dim)
+    (_, _, test_input, test_target) = get_data(train_set_size, test_set_size, model_dim,data_type)
 
     # maintaining the memory
     config = tf.ConfigProto()
@@ -190,7 +190,7 @@ def train_and_predict(n_ts,
     # loading the data
     (train_input, train_target, test_input, test_target) = get_data(train_set_size,
                                                                     test_set_size,
-                                                                    model_dim)
+                                                                    model_dim,data_type)
 
 
 
@@ -250,7 +250,7 @@ if __name__ == "__main__":
 
 
     if testing_effectiveness:
-        pathlib.Path("results/eff_fid_lstm/dim_{}".format(model_dim)).mkdir(parents=True, exist_ok=True)
+        pathlib.Path("results/eff_fid_lstm_unbounded/dim_{}".format(model_dim)).mkdir(parents=True, exist_ok=True)
         # main functionality
         statistic = dict()
         for i in range(1):
@@ -280,7 +280,7 @@ if __name__ == "__main__":
                                                                                            alpha, beta), statistic)
             else:
                 # gamma, alpha = model_params
-                np.savez("results/eff_fid_lstm/dim_{}/statistic_{}_gam_{}_alpha_{}".format(model_dim,
+                np.savez("results/eff_fid_lstm_undbounded/dim_{}/statistic_{}_gam_{}_alpha_{}".format(model_dim,
                                                                                            noise_name,
                                                                                            gamma,
                                                                                            alpha), statistic)

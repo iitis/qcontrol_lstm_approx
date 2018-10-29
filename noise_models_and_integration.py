@@ -17,7 +17,15 @@ Sy = np.array([[0, -1j],
 
 Sz = np.array([[1,0],
                [0,-1]])
-
+########################################################################################################################
+ketbra01 = np.array([[0, 1],
+                    [0, 0]])
+ketbra10 = np.array([[0, 0],
+                    [1, 0]])
+ketbra00 = np.array([[1, 0],
+                      [0, 0]])
+ketbra11 = np.array([[0, 0],
+                      [0, 1]])
 ########################################################################################################################
 # components of the Hamiltonians used for the control and for the noise
 # Lc_x stands for sx on the first (left) qubit and id on the second
@@ -36,6 +44,31 @@ Rc_y = np.kron(np.eye(2), Sy)
 # where H_0 is the spin chain Hamiltonian
 # and H_c is control Hamiltonian acting on the first qubit only
 ########################################################################################################################
+def Sz_and_ketbra01_Lindbald_spinChain_drift(params):
+    gamma, alpha = params
+    L = [np.kron(Sz, np.eye(2)), np.kron(ketbra01, np.eye(2))]  # , np.kron(np.eye(2), ketbra01), np.kron(np.eye(2),Sz)]
+    Lind_part = 0
+    for i in range(len(L)):
+        Lind_part += (
+        2 * np.kron(L[i], L[i].conjugate()) - (np.kron(np.dot(L[i].conjugate().transpose() , L[i]), np.eye(4)) + np.kron(np.eye(4), L[i].transpose() * L[i].conjugate())))
+
+    # Lind_part *= gamma
+
+    spChain = np.kron(Sx, Sx) + np.kron(Sy, Sy) + np.kron(Sz, Sz)
+    Ham_part = np.kron(np.eye(4), spChain.conjugate()) - np.kron(spChain, np.eye(4))
+    Ham_part *= -1j
+
+    # drift plus noise
+    drift = gamma * Lind_part + Ham_part
+
+
+    # controls in hamiltonian form of lindblad equation
+    Hc_x = np.kron(np.eye(4), Lc_x.conjugate()) - np.kron(Lc_x, np.eye(4))
+    Hc_y = np.kron(np.eye(4), Lc_y.conjugate()) - np.kron(Lc_y, np.eye(4))
+
+    ctrls = [-1j * Hc_x, -1j * Hc_y]
+    return (ctrls, drift)
+
 
 def id_aSxbSy_spinChain_2x1(params):
     gamma, alpha = params
@@ -121,6 +154,9 @@ def integrate_lind(h, params, n_ts, evo_time, noise_name, tf_result):
     elif noise_name == "spinChainDrift_spinChain_dim_2x1":
         n = 16
         ctrls, drift = spinChainDrift_spinChain_dim_2x1(params)
+    elif noise_name == "Sz_and_ketbra01_Lindbald_spinChain_drift":
+        n = 16
+        ctrls, drift = Sz_and_ketbra01_Lindbald_spinChain_drift(params)
 
 
     A = np.eye(n,dtype=complex)
