@@ -15,6 +15,7 @@ def get_data(train_set_size,
         print("Test set overlaps with the training set!")
 
     for i in train_indices:
+
         input = np.asarray(np.load("training/dim_{}/{}/idx_{}.npz".format(
             model_dim,data_type, i))['arr_0'])
         u = np.asarray(np.load("training/dim_{}/mtx/idx_{}.npz".format(model_dim, i))['arr_0'])

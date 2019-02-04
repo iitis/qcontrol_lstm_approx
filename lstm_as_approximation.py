@@ -1,40 +1,37 @@
 import os
 from sys import argv, stdout
-# os.environ["CUDA_VISIBLE_DEVICES"]="-1"
+os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 import tensorflow as tf
 import numpy as np
 import scipy
 import scipy.io
 from itertools import product as prod
-
+import time
 from tensorflow.python.client import timeline
+import cProfile
+from sys import argv, stdout
 
 from get_data import *
 import pathlib
-import time
+
 from noise_models_and_integration import *
 from architecture import *
-from constants_of_experiments import *
 
+
+# from experiments import noise_1_paramas as noise_params
 
 def variation_acc2_local_disturb(sess,
                                  network,
                                  x_,
                                  keep_prob,
                                  saver,
-                                 noise_name,
-                                 gamma,
-                                 alpha,
-                                 controls_nb,
                                  test_input,
                                  test_target,
-                                 n_ts,
-                                 evo_time,
-                                 eps,
-                                 accept_err):
+                                 params):
+    eps = 10 ** (-params.eps_order)
 
     # restoring saved model
-    saver.restore(sess, "weights/dim_{}/{}/gam_{}_alfa_{}.ckpt".format(model_dim, noise_name, gamma, alpha))
+    saver.restore(sess, "weights/dim_{}/{}/gam_{}_alfa_{}.ckpt".format(params.model_dim, params.noise_name, params.gamma, params.alpha))
 
     # initializoing resulting tensor, first two dimensions corresponds to coordinate which will be disturbed, on the last dimension, there will be added variation of outputs
     results = np.zeros((n_ts, controls_nb, len(np.array(test_input))))
@@ -42,51 +39,47 @@ def variation_acc2_local_disturb(sess,
     print(len(test_input))
     print(np.shape(results))
     iter = -1
-    tf_result = False
+
     for sample_nb in range(len(np.array(test_input))):
 
         # taking sample NCP
         origin_NCP = test_input[sample_nb]
-        # origin_NCP = np.asarray(list(zip(origin_NCP[:,1],origin_NCP[:,0])))[::-1]
         # taking target superoperator corresponding to the NCP
         origin_superoperator = test_target[sample_nb]
-        # origin_superoperator = integrate_lind(origin_NCP, (0., 0.), n_ts, evo_time, noise_name, tf_result)
-
+        tf_result = False
 
 
         # calculating nnDCP corresponding to input NCP
-        pred_DCP = get_prediction(sess, network, x_, keep_prob, np.reshape(origin_NCP, [1, n_ts, controls_nb]))
+        pred_DCP = get_prediction(sess, network, x_, keep_prob, np.reshape(origin_NCP, [1, params.n_ts, params.controls_nb]))
         # calculating superoperator from nnDCP
-        sup_from_pred_DCP = integrate_lind(pred_DCP[0], (gamma, alpha), n_ts, evo_time, noise_name, tf_result)
+        sup_from_pred_DCP = integrate_lind(pred_DCP[0], tf_result, params)
 
         print("sanity check")
-        error_of_DCP= fidelity_err([origin_superoperator, sup_from_pred_DCP], dim, tf_result)
-        print("predicted DCP", error_of_DCP)
+        acceptable_error = fidelity_err([origin_superoperator, sup_from_pred_DCP], params.dim, tf_result)
+        print("predicted DCP", acceptable_error)
         print("---------------------------------")
 
         ############################################################################################################
         #if sanity test is above assumed error then the experiment is performed
-        if error_of_DCP <= accept_err:
+        if acceptable_error <= params.accept_err:
             iter += 1
             # iteration over all coordinates
-            for (t, c) in prod(range(n_ts), range(controls_nb)):
+            for (t, c) in prod(range(params.n_ts), range(params.controls_nb)):
                 new_NCP = origin_NCP
                 if new_NCP[t, c] < (1 - eps):
                     new_NCP[t, c] += eps
                 else:
                     new_NCP[t, c] -= eps
 
-                sup_from_new_NCP = integrate_lind(new_NCP, (0., 0.), n_ts, evo_time, noise_name, tf_result)
+                sup_from_new_NCP = integrate_lind(new_NCP, tf_result, params)
                 new_DCP = get_prediction(sess, network, x_, keep_prob,
                                          np.reshape(new_NCP, [1, n_ts, controls_nb]))
-
-                sup_form_new_DCP = integrate_lind(new_DCP[0], (gamma, alpha), n_ts, evo_time, noise_name, tf_result)
-
-                error = fidelity_err([sup_from_new_NCP, sup_form_new_DCP], dim, tf_result)
+                sup_form_new_DCP = integrate_lind(new_DCP[0], tf_result, params)
+                error = fidelity_err([sup_from_new_NCP, sup_form_new_DCP], params.dim, tf_result)
 
                 #print(error)
                 # if predicted nnDCP gives wrong superopertaor, then we add not variation of output, but some label
-                if error <= accept_err:
+                if error <= params.accept_err:
                     results[t, c, iter] = np.linalg.norm(pred_DCP - new_DCP)
                 else:
                     results[t, c, iter] = -1
@@ -96,38 +89,26 @@ def variation_acc2_local_disturb(sess,
     print(np.shape(results))
     return results
 
+def experiment_loc_disturb(params):
 
-def experiment_loc_disturb(n_ts,
-                          gamma,
-                          alpha,
-                          evo_time,
-                          supeop_size,
-                          controls_nb,
-                          train_set_size,
-                          test_set_size,
-                          size_of_lrs,
-                          noise_name,
-                          model_dim,
-                          eps,
-                          accept_err):
     ###########################################
     # PLACEHOLDERS
     ###########################################
     # input placeholder
-    x_ = tf.placeholder(tf.float32, [None, n_ts, controls_nb])
+    x_ = tf.placeholder(tf.float32, [None, params.n_ts, params.controls_nb])
     # output placeholder
-    y_ = tf.placeholder(tf.complex128, [None, supeop_size, supeop_size])
+    y_ = tf.placeholder(tf.complex128, [None, params.supeop_size, params.supeop_size])
     # dropout placeholder
     keep_prob = tf.placeholder(tf.float32)
 
     # creating the graph
-    network = my_lstm(x_, controls_nb, size_of_lrs, keep_prob)
+    network = my_lstm(x_, keep_prob, params)
 
     # instance for saving the  model
     saver = tf.train.Saver()
 
     # loading the data
-    (_, _, test_input, test_target) = get_data(train_set_size, test_set_size, model_dim,data_type)
+    (_, _, test_input, test_target) = get_data(params.train_set_size, params.test_set_size, params.model_dim)
 
     # maintaining the memory
     config = tf.ConfigProto()
@@ -140,69 +121,42 @@ def experiment_loc_disturb(n_ts,
                                              x_,
                                              keep_prob,
                                              saver,
-                                             noise_name,
-                                             gamma,
-                                             alpha,
-                                             controls_nb,
                                              test_input,
                                              test_target,
-                                             n_ts,
-                                             evo_time,
-                                             eps,
-                                             accept_err)
+                                             params)
 
     sess.close()
     tf.reset_default_graph()
     return result
 
 
-def train_and_predict(n_ts,
-                      model_params,
-                      evo_time,
-                      batch_size,
-                      supeop_size,
-                      controls_nb,
-                      nb_epochs,
-                      learning_rate,
-                      train_set_size,
-                      test_set_size,
-                      size_of_lrs,
-                      dim,
-                      noise_name,
-                      model_dim):
+def train_and_predict(params, file_name):
 
     ###########################################
     # PLACEHOLDERS
     ###########################################
     # input placeholder
-    x_ = tf.placeholder(tf.float32, [None, n_ts, controls_nb])
+    x_ = tf.placeholder(tf.float32, [None, params.n_ts, params.controls_nb])
     # output placeholder
-    y_ = tf.placeholder(tf.complex128, [None, supeop_size, supeop_size])
+    y_ = tf.placeholder(tf.complex128, [None, params.supeop_size, params.supeop_size])
     # dropout placeholder
     keep_prob = tf.placeholder(tf.float32)
 
     # creating the graph
-    network = my_lstm(x_,controls_nb, size_of_lrs, keep_prob)
+    network = my_lstm(x_, keep_prob, params)
 
     # instance for saving the  model
     saver = tf.train.Saver()
 
     # loading the data
-    (train_input, train_target, test_input, test_target) = get_data(train_set_size,
-                                                                    test_set_size,
-                                                                    model_dim,data_type)
-
-
-
-
+    (train_input, train_target, test_input, test_target) = get_data(params.train_set_size,
+                                                                    params.test_set_size,
+                                                                    params.model_dim,
+                                                                    params.data_type)
     # maintaining the memory
     config = tf.ConfigProto()
-    # config.gpu_options.allow_growth = True
-    config.intra_op_parallelism_threads = 44
-    config.inter_op_parallelism_threads = 44
-
+    config.gpu_options.allow_growth = True
     with tf.Session(config=config) as sess:
-
         # training the network
         (acc,train_table,test_table) = fit(sess,
                   network,
@@ -213,25 +167,12 @@ def train_and_predict(n_ts,
                   train_target,
                   test_input,
                   test_target,
-                  nb_epochs,
-                  batch_size,
-                  train_set_size,
-                  learning_rate,
-                  model_params,
-                  n_ts,
-                  evo_time,
-                  dim,
-                  noise_name)
+                  params)
 
         # making prediction by trained model
         pred = get_prediction(sess, network, x_, keep_prob, test_input)
         # saving trained model
-        if noise_name == "spinChainDrift_spinChain_dim_2x1":
-            gamma, alpha, beta = model_params
-            saver.save(sess, "weights/dim_{}/{}/gam_{}_alfa_{}_beta_{}.ckpt".format(model_dim, noise_name, gamma, alpha,beta))
-        else:
-            gamma, alpha= model_params
-            saver.save(sess, "weights/dim_{}/{}/gam_{}_alfa_{}.ckpt".format(model_dim, noise_name, gamma, alpha))
+        saver.save(sess, "weights/weights_from_{}.ckpt".format(file_name))
 
         sess.close()
     tf.reset_default_graph()
@@ -240,75 +181,73 @@ def train_and_predict(n_ts,
 
 # ---------------------------------------------------------------------------
 
-if __name__ == "__main__":
-    # time.sleep(3600 * 15)
-    # prepare dirs for the output files
-    pathlib.Path("weights/dim_{}/{}".format(model_dim, noise_name)).mkdir(parents=True, exist_ok=True)
+def main(testing_effectiveness,argv_number):
+    config_path = "configurations/"
+    file_name = 'config{}.txt'.format(argv_number)
+    file = open(config_path+file_name, "r")
+    parameters = dict_to_ntuple(eval(file.read()), "parameters")
 
-    # Note: change the below value if you have already trained the network
-    # train_model = True
+    print(parameters.activ_fn)
+
+    pathlib.Path("weights/dim_{}/{}".format(parameters.model_dim, parameters.noise_name)).mkdir(parents=True, exist_ok=True)
 
 
     if testing_effectiveness:
-        pathlib.Path("results/eff_fid_lstm_unbounded/dim_{}".format(model_dim)).mkdir(parents=True, exist_ok=True)
+        pathlib.Path("results/prediction/dim_{}".format(parameters.model_dim)).mkdir(parents=True, exist_ok=True)
         # main functionality
-        statistic = dict()
-        for i in range(1):
-            pred, acc, train_table, test_table = train_and_predict(n_ts,
-                                      model_params,
-                                      evo_time,
-                                      batch_size,
-                                      supeop_size,
-                                      controls_nb,
-                                      nb_epochs,
-                                      learning_rate,
-                                      train_set_size,
-                                      test_set_size,
-                                      size_of_lrs,
-                                      dim,
-                                      noise_name,
-                                      model_dim)
+        if os.path.isfile("results/eff_fid_lstm/experiment_{}".format(file_name[0:-4])+".npz"):
+            statistic = list(np.load("results/eff_fid_lstm/experiment_{}".format(file_name[0:-4])+".npz")["arr_0"][()])
+        else:
+            statistic = []
+
+        for i in range(5):
+            pred, acc, train_table, test_table = train_and_predict(parameters,file_name)
 
 
-            statistic[i] = (acc, train_table, test_table)
+            # statistic.append(acc)
+            statistic.append(pred)
             # save the results
-            if noise_name == "spinChainDrift_spinChain_dim_2x1":
-                # gamma, alpha, beta = model_params
-                np.savez("results/eff_fid_lstm/dim_{}/statistic_{}_gam_{}_alpha_{}_beta_{}".format(model_dim,
-                                                                                           noise_name,
-                                                                                           gamma,
-                                                                                           alpha, beta), statistic)
-            else:
-                # gamma, alpha = model_params
-                np.savez("results/eff_fid_lstm_unbounded/dim_{}/statistic_{}_gam_{}_alpha_{}".format(model_dim,
-                                                                                           noise_name,
-                                                                                           gamma,
-                                                                                           alpha), statistic)
+            print(acc)
+
+            # np.savez("results/eff_fid_lstm/experiment_{}".format(file_name[0:-4]), statistic)
+            np.savez("results/prediction/experiment_{}".format(file_name[0:-4]), statistic)
+
 
     else:
 
-         eps = 10**(-eps_order)
-
-
          # main functionality
          data = experiment_loc_disturb(n_ts,
-                          gamma,
-                          alpha,
-                          evo_time,
-                          supeop_size,
-                          controls_nb,
-                          train_set_size,
-                          test_set_size,
-                          size_of_lrs,
-                          noise_name,
-                          model_dim,
-                          eps,
-                          accept_err)
+                                      gamma,
+                                      alpha,
+                                      evo_time,
+                                      supeop_size,
+                                      controls_nb,
+                                      train_set_size,
+                                      test_set_size,
+                                      size_of_lrs,
+                                      noise_name,
+                                      model_dim,
+                                      eps,
+                                      accept_err)
 
          pathlib.Path("results/NN_as_approx/dim_{}".format(model_dim)).mkdir(parents=True, exist_ok=True)
-         np.savez("results/NN_as_approx/dim_{}/{}_gam_{}_alpha_{}_epsilon_1e-{}".format(model_dim,
-                                                                                        noise_name,
-                                                                                        gamma,
-                                                                                        alpha,
-                                                                                        eps_order), data)
+         np.savez("results/NN_as_approx/experiment_{}".format(file_name[0:-4]), data)
+
+    file.close()
+
+
+if __name__ == "__main__":
+
+    # prepare dirs for the output files
+
+
+    # Note: change the below value if you have already trained the network
+    # train_model = True
+    if len(argv) == 2:
+        argv_number = int(argv[1])
+    else:
+        argv_number = 63
+    main(True,argv_number )
+
+
 
