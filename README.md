@@ -29,4 +29,4 @@ control pulses.
 
 # Citing
 
-M. Ostaszewski, J.A. Miszczak, P. Sadowski, L. Banchi,  Approximation of quantum control correction scheme using deep neural networks, https://arxiv.org/abs/1803.05193
+M. Ostaszewski, J.A. Miszczak, P. Sadowski, L. Banchi,  //Approximation of quantum control correction scheme using deep neural networks//, https://arxiv.org/abs/1803.05193, Quantum Inf Process (2019), 18:126, https://doi.org/10.1007/s11128-019-2240-7
